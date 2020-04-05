@@ -1,0 +1,40 @@
+$fontSize: 37.5;
+@function px2rem($px) {
+  @return ($px / $fontSize) + rem
+}
+
+@mixin center () {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin left () {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin right () {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@mixin ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@mixin ellipsis2($lines) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+  white-space: normal;
+  overflow: hidden;
+  -ms-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  -ms-word-break: break-all;
+  word-break: break-all;
+}
