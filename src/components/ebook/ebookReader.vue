@@ -1,7 +1,11 @@
 <template>
     <div class="ebook-reader">
         <div id="read"></div>
-        <div class="mask" ref="mask" @touchstart="touchStart" @touchend="touchEnd"></div>
+        <div class="ebook-reader-mask"
+             ref="mask"
+             @touchstart.prevent.stop="touchStart"
+             @touchmove.prevent.stop="touchmove"
+             @touchend.prevent.stop="touchEnd"></div>
     </div>
 </template>
 
@@ -116,18 +120,36 @@
             },
             touchStart (event) {
                 this.touchStartX = event.changedTouches[0].clientX
+                this.touchStartY = event.changedTouches[0].clientY
                 this.touchStartTime = event.timeStamp
+            },
+            touchmove (event) {
+                let offsetY = 0
+                if (this.touchStartY) {
+                    offsetY = event.changedTouches[0].clientY - this.touchStartY
+                    this.setOffsetY(offsetY)
+                }
             },
             touchEnd (event) {
                 const offsetX = event.changedTouches[0].clientX - this.touchStartX
+                const offsetY = event.changedTouches[0].clientY - this.touchStartY
                 const time = event.timeStamp - this.touchStartTime
                 if (time < 500 && offsetX > 40) {
                     this.prevPage()
                 } else if (time < 500 && offsetX < -40) {
                     this.nextPage()
-                } else {
-                    this.toggleTitleAndMenu()
+                } else if (offsetY > -10 && offsetY < 10 && offsetX > -10 && offsetX < 10) {
+                    const width = window.innerWidth
+                    if (this.touchStartX < width * 0.3) {
+                        this.prevPage()
+                    } else if (this.touchStartX > width * 0.7) {
+                        this.nextPage()
+                    } else {
+                        this.toggleTitleAndMenu()
+                    }
                 }
+                this.setOffsetY(0)
+                this.touchStartY = null
             },
             prevPage () {
                 if (this.rendition) {
@@ -163,14 +185,18 @@
 </script>
 
 <style scoped lang="scss">
-.mask {
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    position: fixed;
-    z-index: 100;
-}
+    .ebook-reader {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        .ebook-reader-mask {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: transparent;
+            position: absolute;
+            z-index: 50;
+        }
+    }
 </style>

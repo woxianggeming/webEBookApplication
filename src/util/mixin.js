@@ -1,6 +1,6 @@
 import { mapGetters, mapActions } from 'vuex'
 import { themeList, addCss, removeAllCss, getReadTimeByMinute } from './book'
-import { saveLocation } from './localStorage'
+import {getBookmark, saveLocation} from './localStorage'
 
 export const ebookMixin = {
     computed: {
@@ -73,6 +73,10 @@ export const ebookMixin = {
         },
         refreshLocation (hasSet) {
             const currentLocation = this.currentBook.rendition.currentLocation()
+            //epubcfi(/6/22[A468350_1_En_7_Chapter]!/4/12/18[Bib1]/4/8/4[CR4]/1:104)
+            // A468350_1_En_7_Chapter: 对应的文件
+            // ! : 打开文件操作
+            // /4/12/18[Bib1]/4/8/4[CR4]/1:104 : 双数代表dom节点，表示从上至下第 n/2 个dom， [Bib1]辅助定位，表示dom id，单数表示第 n 条文本，:104 表示第104个字符
             if (currentLocation && currentLocation.start) {
                 const startCFI = currentLocation.start.cfi
                 if (!hasSet) {
@@ -81,6 +85,17 @@ export const ebookMixin = {
                 }
                 this.setSection(currentLocation.start.index)
                 saveLocation(this.fileName, startCFI)
+
+                const bookmarkList = getBookmark(this.fileName)
+                if (bookmarkList) {
+                    if (bookmarkList.some(item => item.cfi === startCFI)) {
+                        this.setIsBookmark(true)
+                    } else {
+                        this.setIsBookmark(false)
+                    }
+                } else {
+                    this.setIsBookmark(false)
+                }
             }
         },
         display (target, cb) {
